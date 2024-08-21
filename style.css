@@ -1,0 +1,17 @@
+.container {
+  height: 700px;
+}
+
+.input-group:has(.active) input {
+  border-color: var(--bs-success);
+  background-color: rgba(25, 135, 84, 0.25);
+}
+
+.active-todo {
+  border: var(--bs-secondary);
+  border-style: solid;
+  border-radius: 10px;
+  border-width: medium;
+}
+
+/*# sourceMappingURL=style.css.map */
