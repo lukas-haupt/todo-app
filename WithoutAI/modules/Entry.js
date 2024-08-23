@@ -1,14 +1,14 @@
-class Todo {
+class Entry {
     #description;
     #checked;
     #active;
     #entries;
 
-    constructor(description = '', active = 1) {
+    constructor(description = '', active = true, checked = false, entries = []) {
         this.#description = description;
         this.#active = active;
-        this.#checked = 0;
-        this.#entries = {};
+        this.#checked = checked;
+        this.#entries = entries;
     }
 
     getDescription(){
@@ -35,7 +35,11 @@ class Todo {
         this.#checked = checked;
     }
 
-    getEntries(){
+    /**
+     * Returns subtasks of the current entry
+     * @returns {Entry[]}
+     */
+    getEntries() {
         return this.#entries;
     }
 
@@ -45,24 +49,24 @@ class Todo {
 
     addEntries(...entries) {
         for (const entry of entries) {
-            this.#entries[Object.keys(this.getEntries()).length] = entry;
+            this.#entries.push(entry);
         }
     }
 
+    static fromObject(obj) {
+        const entry = new Entry(obj.description, obj.active, obj.checked);
+        Object.values(obj.entries).forEach(subtask => entry.addEntries(this.fromObject(subtask)));
+        return entry;
+    }
+
     toObject() {
-        let entryObjects = {};
-
-        Object.values(this.getEntries()).forEach((entry, key) => {
-            entryObjects[key] = entry.toObject();
-        });
-
         return {
             description: this.getDescription(),
             active: this.getActive(),
             checked: this.getChecked(),
-            entries: entryObjects
+            entries: this.getEntries().map(subtask => subtask.toObject())
         };
     }
 }
 
-export default Todo;
+export default Entry;

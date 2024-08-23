@@ -1,4 +1,4 @@
-import Todo from "./Todo.js";
+import Entry from "./Entry.js";
 import dh from "./DataHandler.js";
 
 const Icon = {
@@ -117,13 +117,13 @@ function createEntry(entry){
     const newEntryContext = getNewEntryContext(entry);
 
     if (newEntryContext === dh.LS_KEY.TODOS) {
-        let todo = new Todo(application.newTodoText.value, 1);
-        dh.create(newEntryContext, todo.toObject());
+        let todo = new Entry(application.newTodoText.value, true);
+        dh.create(newEntryContext, todo);
         dh.setActiveLatestTodo();
         resetInput(application.newTodoText, application.newTodoButton);
     } else {
-        let task = new Todo(application.newTaskText.value, 0)
-        dh.create(newEntryContext, task.toObject());
+        let task = new Entry(application.newTaskText.value, false)
+        dh.create(newEntryContext, task);
         resetInput(application.newTaskText, application.newTaskButton);
         checkTodoCompletion();
     }
@@ -142,10 +142,10 @@ function checkEntry(element) {
 
     if (element.classList.contains('active')) {
         element.classList.remove('active');
-        dh.setValue(context, index, {'checked': 0});
+        dh.setValue(context, index, 'setChecked', false);
     } else {
         element.classList.add('active');
-        dh.setValue(context, index, {'checked': 1});
+        dh.setValue(context, index, 'setChecked', true);
     }
 
     if (context === dh.LS_KEY.TASKS) {
@@ -156,15 +156,13 @@ function checkEntry(element) {
 }
 
 function checkTodoCompletion() {
-    const lsTodos = JSON.parse(localStorage.getItem(dh.LS_KEY.TODOS));
+    const lsEntries = dh.loadData();
     let completed = true
 
-    for (const [key, todo] of Object.entries(lsTodos)) {
-        completed = !Object.values(todo.entries)
-            .some((entry) => entry.checked === 0) && Object.keys(todo.entries).length > 0;
-
-        dh.setValue(dh.LS_KEY.TODOS, key, {'checked': completed === true ? 1 : 0});
-    }
+    lsEntries.forEach((entry, key) => {
+        completed = entry.getEntries().length > 0 && !entry.getEntries().some(subtask => !subtask.getChecked());
+        dh.setValue(dh.LS_KEY.TODOS, key, 'setChecked', completed);
+    });
 }
 
 function editAndSaveEntry() {
@@ -186,7 +184,8 @@ function editAndSaveEntry() {
     dh.setValue(
         getElementContext(inputTextField),
         getElementIndex(inputTextField),
-        {'description': inputTextField.value}
+        'setDescription',
+        inputTextField.value
     );
 }
 
@@ -194,11 +193,12 @@ function deleteEntry(element) {
     let index = getElementIndex(element);
     let context = getElementContext(element);
 
+    dh.delete(context, index);
+
     if (index === dh.getActiveTodoIndex()) {
         dh.setActiveTodo(0);
     }
 
-    dh.delete(context, index);
     checkTodoCompletion();
     renderView();
 }
@@ -209,33 +209,33 @@ function setActiveTodo(element) {
 }
 
 function renderView() {
-    const lsTodos = JSON.parse(localStorage.getItem(dh.LS_KEY.TODOS));
+    const lsEntries = dh.loadData();
     let todosDiv = document.getElementById(dh.LS_KEY.TODOS);
     let tasksDiv = document.getElementById(dh.LS_KEY.TASKS);
 
     todosDiv.innerHTML = '';
     tasksDiv.innerHTML = '';
 
-    for (const todo of Object.values(lsTodos)) {
-        const todoElement = createHTML(dh.LS_KEY.TODOS, todo);
+    lsEntries.forEach(entry => {
+        const todoElement = createHTML(dh.LS_KEY.TODOS, entry);
 
-        if (todo.active === 1) {
-            for (const task of Object.values(todo.entries)) {
-                const taskElement = createHTML(dh.LS_KEY.TASKS, task);
+        if (entry.getActive()) {
+            entry.getEntries().forEach(subtask => {
+                const taskElement = createHTML(dh.LS_KEY.TASKS, subtask);
                 tasksDiv.appendChild(taskElement);
-            }
+            });
         }
 
         todosDiv.appendChild(todoElement);
-    }
+    });
 
     defineEventListener();
 }
 
 function createHTML(context, contextElement) {
     let element = document.createElement('div');
-    let checked = (contextElement.checked === 1) ? ' active' : '';
-    let active = (contextElement.active === 1) ? ' active-todo' : '';
+    let checked = (contextElement.getChecked()) ? ' active' : '';
+    let active = (contextElement.getActive()) ? ' active-todo' : '';
 
     element.className = 'input-group mb-3' + active;
     element.dataset.type = 'entry';
@@ -245,7 +245,7 @@ function createHTML(context, contextElement) {
             <i class="bi bi-check-lg"></i>
         </button>
 
-        <input name="entry-description" type="text" class="form-control" value="` + contextElement.description + `" readonly>
+        <input name="entry-description" type="text" class="form-control" value="` + contextElement.getDescription() + `" readonly>
 
         <button name="edit-save-button" class="btn btn-outline-primary" data-mode="SAVE">
             <i class="bi bi-pencil-square"></i>

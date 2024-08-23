@@ -1,3 +1,5 @@
+import Entry from "./Entry.js";
+
 class DataHandler{
     static LS_KEY = {
         TODOS: 'TODOS',
@@ -6,10 +8,22 @@ class DataHandler{
     static LS_OUTPUT_FILE = 'todos.json';
     static LS_FILE_TYPE = 'application/json';
 
-    static initializeLocalStorage() {
-        if (localStorage.getItem(this.LS_KEY.TODOS) === null) {
-            localStorage.setItem(this.LS_KEY.TODOS, JSON.stringify({}));
-        }
+    /**
+     * Returns an array of Entry class instances
+     * @returns Entry[]
+     */
+    static loadData() {
+        const json = JSON.parse(localStorage.getItem(this.LS_KEY.TODOS)) ?? [];
+        return Object.values(json).map(obj => Entry.fromObject(obj));
+    }
+
+    /**
+     * Save the current entry data to localstorage
+     * @param {Entry[]} entries
+     */
+    static saveData(entries) {
+        const data = entries.map(entry => entry.toObject());
+        localStorage.setItem(this.LS_KEY.TODOS, JSON.stringify(data));
     }
 
     static readFile(file) {
@@ -31,16 +45,18 @@ class DataHandler{
     static import(){
         const inputFile = document.getElementById('inputFile');
 
-        return DataHandler.readFile(inputFile).then((lsTodos) => {
-            lsTodos = JSON.parse(String(lsTodos));
-            localStorage.setItem(this.LS_KEY.TODOS, JSON.stringify(lsTodos));
+        return DataHandler.readFile(inputFile).then(lsEntries => {
+            lsEntries = JSON.parse(String(lsEntries));
+            lsEntries = Object.values(lsEntries).map(entry => Entry.fromObject(entry));
+            this.saveData(lsEntries);
         });
     }
 
     static export(button){
-        const lsTodos = JSON.parse(localStorage.getItem(this.LS_KEY.TODOS));
+        let lsEntries = this.loadData();
+        lsEntries = lsEntries.map(entry => entry.toObject());
         const blob = new Blob(
-            [JSON.stringify(lsTodos, null, "\t")],
+            [JSON.stringify(lsEntries, null, "\t")],
             {type: this.LS_FILE_TYPE}
         );
 
@@ -48,102 +64,90 @@ class DataHandler{
     }
 
     static create(context, entry) {
-        const lsTodos = JSON.parse(localStorage.getItem(this.LS_KEY.TODOS));
-        let index;
-
+        const lsEntries = this.loadData();
         if (context === this.LS_KEY.TODOS) {
-            index = Object.keys(lsTodos).length;
-            lsTodos[index] = entry;
+            lsEntries.push(entry);
         } else {
-            let activeTodoIndex = this.getActiveTodoIndex();
-
-            index = Object.keys(lsTodos[activeTodoIndex].entries).length;
-            lsTodos[activeTodoIndex].entries[index] = entry;
+            lsEntries[this.getActiveTodoIndex()].getEntries().push(entry);
         }
 
-        localStorage.setItem(this.LS_KEY.TODOS, JSON.stringify(lsTodos));
+        this.saveData(lsEntries);
     }
 
-    static setValue(context, index, change) {
-        const lsTodos = JSON.parse(localStorage.getItem(this.LS_KEY.TODOS));
+    static setValue(context, index, functionCall, value) {
+        const lsEntries = this.loadData();
 
-        for (const [key, value] of Object.entries(change)) {
-            if (context === this.LS_KEY.TODOS) {
-                lsTodos[index][key] = value;
-            } else {
-                lsTodos[this.getActiveTodoIndex()].entries[index][key] = value;
-            }
+        if (context === this.LS_KEY.TODOS) {
+            lsEntries[index][functionCall](value)
+        } else {
+            lsEntries[this.getActiveTodoIndex()].getEntries()[index][functionCall](value);
         }
 
-        localStorage.setItem(this.LS_KEY.TODOS, JSON.stringify(lsTodos));
+        this.saveData(lsEntries);
     }
 
     static shiftFromToByContextAndIndex(context, fromIndex, toIndex) {
-        const lsTodos = JSON.parse(localStorage.getItem(this.LS_KEY.TODOS));
+        const lsEntries = this.loadData();
         const isTodoContext = (context === this.LS_KEY.TODOS)
         const moveUpwards = (fromIndex > toIndex);
-        const fromEntry = isTodoContext ? lsTodos[fromIndex] : lsTodos[this.getActiveTodoIndex()].entries[fromIndex];
+        const fromEntry = isTodoContext ? lsEntries[fromIndex] : lsEntries[this.getActiveTodoIndex()].getEntries()[fromIndex];
 
         if (isTodoContext) {
             for (let i = fromIndex; (moveUpwards) ? i > toIndex : i < toIndex; (moveUpwards) ? i-- : i++) {
-                lsTodos[i] = lsTodos[(moveUpwards) ? i - 1 : i + 1];
+                lsEntries[i] = lsEntries[(moveUpwards) ? i - 1 : i + 1];
             }
 
-            lsTodos[toIndex] = fromEntry;
+            lsEntries[toIndex] = fromEntry;
         } else {
             for (let i = fromIndex; (moveUpwards) ? i > toIndex : i < toIndex; (moveUpwards) ? i-- : i++) {
-                lsTodos[this.getActiveTodoIndex()].entries[i] =
-                    lsTodos[this.getActiveTodoIndex()].entries[(moveUpwards) ? i - 1 : i + 1];
+                lsEntries[this.getActiveTodoIndex()].getEntries()[i] =
+                    lsEntries[this.getActiveTodoIndex()].getEntries()[(moveUpwards) ? i - 1 : i + 1];
             }
 
-            lsTodos[this.getActiveTodoIndex()].entries[toIndex] = fromEntry;
+            lsEntries[this.getActiveTodoIndex()].getEntries()[toIndex] = fromEntry;
         }
 
-        localStorage.setItem(this.LS_KEY.TODOS, JSON.stringify(lsTodos));
+        this.saveData(lsEntries);
     }
 
     static delete(context, index) {
-        let lsTodos = JSON.parse(localStorage.getItem(this.LS_KEY.TODOS));
+        let lsEntries = this.loadData();
 
         if (context === this.LS_KEY.TODOS) {
-            let newContext = {};
-            delete lsTodos[index];
-            Object.keys(lsTodos).forEach((key, index) => {
-                newContext[index] = lsTodos[key];
-            });
-
-            lsTodos = newContext;
+            lsEntries.splice(index, 1);
         } else {
-            delete lsTodos[this.getActiveTodoIndex()].entries[index];
+            lsEntries[this.getActiveTodoIndex()].getEntries().splice(index, 1);
         }
 
-        localStorage.setItem(this.LS_KEY.TODOS, JSON.stringify(lsTodos));
+        this.saveData(lsEntries);
     }
 
     static setActiveTodo(index) {
-        const lsTodos = JSON.parse(localStorage.getItem(this.LS_KEY.TODOS));
+        const lsEntries = this.loadData();
 
-        for (let i = 0; i < Object.keys(lsTodos).length; i++) {
-            lsTodos[i].active = (i === index) ? 1 : 0;
-        }
+        lsEntries.forEach((entry, key) => {
+            entry.setActive(key === index);
+        });
 
-        localStorage.setItem(this.LS_KEY.TODOS, JSON.stringify(lsTodos));
+        this.saveData(lsEntries);
     }
 
     static getActiveTodoIndex() {
-        const lsTodos = JSON.parse(localStorage.getItem(this.LS_KEY.TODOS));
-        for (const [key, todo] of Object.entries(lsTodos)) {
-            if (todo.active === 1) {
-                return Number(key);
-            }
-        }
+        const lsEntries = this.loadData();
+        let activeIndex = 0;
 
-        return 0;
+        lsEntries.forEach((entry, key) => {
+            if (entry.getActive()) {
+                activeIndex = key;
+            }
+        });
+
+        return activeIndex;
     }
 
     static setActiveLatestTodo() {
-        const lsTodos =  JSON.parse(localStorage.getItem(this.LS_KEY.TODOS));
-        const latestTodoIndex =  Object.keys(lsTodos).length - 1;
+        const lsEntries =  this.loadData();
+        const latestTodoIndex = lsEntries.length - 1;
         this.setActiveTodo(latestTodoIndex);
     }
 }
