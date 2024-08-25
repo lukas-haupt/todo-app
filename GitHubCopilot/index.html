@@ -20,5 +20,46 @@
     <title>Title</title>
 </head>
 <body>
+    <!-- Create a two column layout, where the left column is for todos and the right column for tasks -->
+    <h1 class="text-center">To-do Applikation</h1>
+    <div class="container border border-2">
+        <div class="row h-100">
+            <div class="col-4 border-end d-flex align-items-end flex-column">
+                <h3 class="text-center mt-1 border-bottom w-100">To-do's</h3>
+                <div class="w-100" id="TODOS"></div>
+
+                <!-- Create an input field for new todos and a button to add them -->
+                <div class="input-group mt-3 mb-auto">
+                    <input id="newTodoText" type="text" class="form-control" placeholder="Neues To-do" aria-label="To-do with add button">
+                    <button id="newTodoButton" class="btn btn-outline-secondary" type="button" disabled>
+                        <i class="bi bi-plus-lg"></i>
+                    </button>
+                </div>
+
+                <!-- Create a button group for import and export functionalities -->
+                <div class="btn-group w-100 mb-3" role="group" aria-label="Import and export functions">
+                    <label id="uploadButton" class="btn btn-outline-secondary" for="importFile">
+                        <input id="importFile" class="d-none" accept="application/json" type="file" />
+                        <i class="bi bi-upload"></i>
+                    </label>
+                    <a id="downloadButton" class="btn btn-outline-secondary" type="button">
+                        <i class="bi bi-download"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="col-8">
+                <h3 class="text-center mt-1 border-bottom">Aufgaben</h3>
+                <div id="TASKS"></div>
+
+                <!-- Create an input field for new todos and a button to add them -->
+                <div class="input-group mt-4 mb-4">
+                    <input id="newTaskText" type="text" class="form-control" placeholder="Neue Aufgabe" aria-label="Task with add button">
+                    <button id="newTaskButton" class="btn btn-outline-secondary" type="button" disabled>
+                        <i class="bi bi-plus-lg"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
