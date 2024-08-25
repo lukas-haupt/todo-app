@@ -1,5 +1,5 @@
 .container {
-  height: 700px;
+  height: 500px;
 }
 
 .input-group:has(.active) input {
