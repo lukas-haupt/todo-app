@@ -3,69 +3,80 @@ class Entry {
         this.checked = false;        // Indicates if the entry is checked
         this.active = true;          // Indicates if the entry is currently active (visible)
         this.description = description; // Description of the entry
-        this.entries = [];           // Array to hold subtasks
+        this.subtasks = [];           // Array to hold subtasks (renamed from 'entries' for clarity)
     }
 
-    // Method to toggle the checked state
+    // Toggle the checked state
     toggleChecked() {
         this.checked = !this.checked;
     }
 
-    // Method to set the active state
+    // Set the active state
     setActive(state) {
         this.active = state;
     }
 
-    // Method to update the description
+    // Update the description
     updateDescription(newDescription) {
-        this.description = newDescription;
+        if (typeof newDescription === 'string' && newDescription.trim()) {
+            this.description = newDescription;
+        } else {
+            console.error('Invalid description');
+        }
     }
 
-    // Method to add a subtask
+    // Add a subtask
     addSubtask(subtask) {
-        this.entries.push(subtask);
+        if (subtask instanceof Entry) {
+            this.subtasks.push(subtask);
+        } else {
+            console.error('Subtask must be an instance of Entry');
+        }
     }
 
-    // Method to remove a subtask by index
+    // Remove a subtask by index
     removeSubtask(index) {
-        if (index >= 0 && index < this.entries.length) {
-            this.entries.splice(index, 1);
+        if (index >= 0 && index < this.subtasks.length) {
+            this.subtasks.splice(index, 1);
+        } else {
+            console.error('Invalid index');
         }
     }
 
-    // Method to get the subtask by index
+    // Get a subtask by index
     getSubtask(index) {
-        if (index >= 0 && index < this.entries.length) {
-            return this.entries[index];
-        }
-        return null;
+        return this.subtasks[index] || null;
     }
 
-    // Method to list all subtasks
+    // List all subtasks
     listSubtasks() {
-        return this.entries;
+        return this.subtasks.slice(); // Return a shallow copy to prevent external mutation
     }
 
-    // Method to convert the entry to a JSON string
+    // Convert the entry to a JSON string
     toJSON() {
         return JSON.stringify({
             checked: this.checked,
             active: this.active,
             description: this.description,
-            entries: this.entries
+            subtasks: this.subtasks.map(subtask => subtask.toJSON()) // Ensure subtasks are serialized properly
         });
     }
 
     // Static method to create an Entry instance from a JSON string
     static fromJSON(jsonString) {
-        const data = JSON.parse(jsonString);
-        const entry = new Entry(data.description);
-        entry.checked = data.checked;
-        entry.active = data.active;
-        entry.entries = data.entries;
-        return entry;
+        try {
+            const data = JSON.parse(jsonString);
+            const entry = new Entry(data.description);
+            entry.checked = data.checked;
+            entry.active = data.active;
+            entry.subtasks = (data.subtasks || []).map(Entry.fromJSON); // Recursively create subtasks
+            return entry;
+        } catch (e) {
+            console.error('Invalid JSON string');
+            return null;
+        }
     }
 }
 
-// Export the class for use in other modules
 export default Entry;
