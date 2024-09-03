@@ -28,7 +28,11 @@ const ICONS = {
 };
 
 
-// Create a function that creates a new todo/task element according to the context
+/**
+ * Creates a new to-do/task element according to the context
+ * @param {string} context - The context (TODOS or TASKS)
+ * @param {string} description - The description of the new entry
+ */
 function createNewEntry(context, description) {
     const entry = new Entry(description, false, context === dh.CONTEXT.TODOS);
     const data = dh.loadData();
@@ -44,8 +48,13 @@ function createNewEntry(context, description) {
     render();
 }
 
-/* A function that checks the input field of the newly todo/task and disables the button and
-    adds Bootstrap classes for the input, if the input is invalid */
+/**
+ * Checks the input field of the newly to-do/task and disables the button and
+ * adds Bootstrap classes for the input, if the input is invalid
+ * @param {HTMLInputElement} inputField - The input field element
+ * @param {HTMLButtonElement} button - The button element
+ * @returns {boolean} - Whether the input field is valid
+ */
 function hasValidInputField(inputField, button) {
     const isValidInput = inputField.value !== '';
     if (isValidInput) {
@@ -58,13 +67,20 @@ function hasValidInputField(inputField, button) {
     return isValidInput;
 }
 
+/**
+ * Gets the context of an element
+ * @param {HTMLElement} entry - The entry element
+ * @returns {string} - The context (TODOS or TASKS)
+ */
 function getElementContext(entry) {
     return elements.todosDiv.contains(entry) ? dh.CONTEXT.TODOS : dh.CONTEXT.TASKS;
 }
 
-// Create a function that initializes all base event listeners like adding todos/tasks and import/export data
+/**
+ * Initializes all base event listeners like adding todos/tasks and import/export data
+ */
 function initBaseEventListeners() {
-    // Add event listener to add a todo
+    // Add event listener to add a to-do
     elements.addTodoButton.addEventListener('click', () => {
         createNewEntry(dh.CONTEXT.TODOS, elements.addTodoInput.value);
         elements.addTodoInput.value = '';
@@ -84,7 +100,7 @@ function initBaseEventListeners() {
 
     // Add event listener to import data
     elements.importButton.addEventListener('change', () => {
-        dh.importData().then((data) => render());
+        dh.importData().then(() => render());
     });
 
     // Add event listener to export data
@@ -93,10 +109,19 @@ function initBaseEventListeners() {
     });
 }
 
+/**
+ * Gets the index of an element in its parent
+ * @param {HTMLElement} element - The element
+ * @returns {number} - The index of the element in its parent
+ */
 function getElementIndexInParent(element) {
     return Array.from(element.closest('#TODOS, #TASKS').children).indexOf(element);
 }
 
+/**
+ * Sets the active to-do entry
+ * @param {HTMLElement} entry - The entry element
+ */
 function setActiveTodo(entry) {
     const data = dh.loadData();
     const entryIndex = getElementIndexInParent(entry.parentElement);
@@ -106,6 +131,10 @@ function setActiveTodo(entry) {
     dh.saveData(data);
 }
 
+/**
+ * Checks an entry
+ * @param {HTMLElement} entry - The entry element
+ */
 function checkEntry(entry) {
     const data = dh.loadData();
     const entryIndex = getElementIndexInParent(entry);
@@ -120,6 +149,9 @@ function checkEntry(entry) {
     }
 }
 
+/**
+ * Observes and automatically checks the to-do if all tasks are completed
+ */
 function observeAutoTodoCheck() {
     const data = dh.loadData();
 
@@ -131,6 +163,10 @@ function observeAutoTodoCheck() {
     dh.saveData(data);
 }
 
+/**
+ * Edits and saves an entry
+ * @param {HTMLElement} entry - The entry element
+ */
 function editAndSaveEntry(entry) {
     const data = dh.loadData();
     const entryIndex = getElementIndexInParent(entry.parentElement);
@@ -152,6 +188,10 @@ function editAndSaveEntry(entry) {
     dh.saveData(data);
 }
 
+/**
+ * Deletes an entry
+ * @param {HTMLElement} entry - The entry element
+ */
 function deleteEntry(entry) {
     const data = dh.loadData();
     const entryIndex = getElementIndexInParent(entry.parentElement);
@@ -166,7 +206,9 @@ function deleteEntry(entry) {
     observeAutoTodoCheck();
 }
 
-// A function that adds event listeners to rendered entries
+/**
+ * Adds event listeners to rendered entries
+ */
 function initEntryEventListeners() {
     const entries = document.querySelectorAll('[data-type="entry"]');
 
@@ -188,10 +230,12 @@ function initEntryEventListeners() {
         descriptionInput.addEventListener('input', function () {
             hasValidInputField(this, editSaveButton);
         });
-        descriptionInput.addEventListener('dblclick', function () {
-            setActiveTodo(this);
-            render();
-        });
+        if (getElementContext(entry) === dh.CONTEXT.TODOS) {
+            descriptionInput.addEventListener('dblclick', function () {
+                setActiveTodo(this);
+                render();
+            });
+        }
 
         // Create a drag and drop event listener for the entry description input
         entry.addEventListener('dragstart', function () {
@@ -209,12 +253,19 @@ function initEntryEventListeners() {
     });
 }
 
+/**
+ * Handles the drag start event
+ * @param {HTMLElement} entry - The entry element
+ */
 function onDragStart(entry) {
     entry.classList.add('dragging');
 }
 
+/**
+ * Handles the drag end event
+ * @param {HTMLElement} entry - The entry element
+ */
 function onDragEnd(entry) {
-    const data = dh.loadData();
     const othersInDiv = [...document.querySelectorAll('[data-type="entry"]:not(.dragging)')];
     const targetElement = getTargetElementOnDragEnd(entry, othersInDiv);
     entry.classList.remove('dragging');
@@ -230,6 +281,12 @@ function onDragEnd(entry) {
     render();
 }
 
+/**
+ * Gets the target element on drag end
+ * @param {HTMLElement} entry - The dragged entry element
+ * @param {HTMLElement[]} othersInDiv - The other elements in the same container
+ * @returns {HTMLElement|null} - The target element or null if not found
+ */
 function getTargetElementOnDragEnd(entry, othersInDiv) {
     const mouseX = event.clientX;
     const mouseY = event.clientY;
@@ -251,7 +308,11 @@ function getTargetElementOnDragEnd(entry, othersInDiv) {
     return null;
 }
 
-// This function creates an HTML element from an entry class object
+/**
+ * Creates an HTML element from an Entry instance
+ * @param {Entry} entry - The Entry instance
+ * @returns {HTMLElement} - The created HTML element
+ */
 function createHTMLFromEntry(entry) {
     const div = document.createElement('div');
     const checked = entry.getChecked() ? ' active' : '';
@@ -278,7 +339,9 @@ function createHTMLFromEntry(entry) {
     return div;
 }
 
-// A function that renders the view of todos and tasks according to the active todo
+/**
+ * Renders the view of todos and tasks according to the active to-do
+ */
 function render() {
     const data = dh.loadData();
 

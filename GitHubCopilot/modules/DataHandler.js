@@ -1,33 +1,33 @@
-// Import Entry class
 import Entry from './Entry.js';
 
-// Create a DataHandler class
+// DataHandler class handles loading, saving, importing, and exporting to-do data
 class DataHandler {
-    // Create a constant for the localstorage key
     static LS_KEY = 'githubCopilot';
-
-    // Create a constant for the context of an entry
     static CONTEXT = {
         TODOS: 'TODOS',
         TASKS: 'TASKS'
-    }
+    };
 
-    // Create a function that gets data from localstorage with key 'githubCopilot' and returns type Entry[]
     /**
-     * Loads the localstorage todo data and returns an array of Entries
-     * @returns {Entry[]}
+     * Loads the localstorage to-do data and returns an array of Entries
+     * @returns {Entry[]} - An array of Entry instances
      */
     static loadData() {
         const data = JSON.parse(localStorage.getItem(this.LS_KEY)) ?? [];
         return Entry.fromJSON(data);
     }
 
-    // Create a function that saves data to localstorage with key 'githubCopilot' and data being converted to JSON format
+    /**
+     * Saves data to localstorage with key 'githubCopilot'
+     * @param {Entry[]} data - An array of Entry instances to save
+     */
     static saveData(data) {
         localStorage.setItem(this.LS_KEY, JSON.stringify(data.map(entry => entry.toObject())));
     }
 
-    // Create a function that exports the localstorage with this.LS_KEY as formatted JSON string to a local file
+    /**
+     * Exports the localstorage data as a JSON file
+     */
     static exportData() {
         const data = localStorage.getItem(this.LS_KEY);
         const blob = new Blob([data], { type: 'application/json' });
@@ -37,7 +37,10 @@ class DataHandler {
         a.download = 'githubCopilot.json';
     }
 
-    // Create a function that imports a local file and sets the localstorage with this.LS_KEY to the content of the file
+    /**
+     * Imports data from a local JSON file and sets it to localstorage
+     * @returns {Promise<void>}
+     */
     static importData() {
         const importFile = document.getElementById('importFile');
         return this.readFile(importFile).then(data => {
@@ -47,6 +50,11 @@ class DataHandler {
         });
     }
 
+    /**
+     * Reads the content of a file input
+     * @param {HTMLInputElement} importFile - The file input element
+     * @returns {Promise<string>} - The content of the file
+     */
     static readFile(importFile) {
         const fileReader = new FileReader();
 
@@ -57,17 +65,26 @@ class DataHandler {
             };
             fileReader.onerror = () => {
                 fileReader.abort();
-                reject(new DOMException('A problem occured while parsing the input file.'));
+                reject(new DOMException('A problem occurred while parsing the input file.'));
             };
         });
     }
 
+    /**
+     * Gets the index of the active to-do entry
+     * @returns {number} - The index of the active to-do entry
+     */
     static getActiveTodoIndex() {
         const data = this.loadData();
         return data.findIndex(entry => entry.getActive());
     }
 
-    // Create a function that shifts the entry data according to start/end index and context and saves it to localstorage
+    /**
+     * Shifts the entry data according to start/end index and context and saves it to localstorage
+     * @param {number} startIndex - The starting index
+     * @param {number} endIndex - The ending index
+     * @param {string} context - The context (TODOS or TASKS)
+     */
     static shiftFromToIndexByContext(startIndex, endIndex, context) {
         const data = this.loadData();
 

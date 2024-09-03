@@ -1,10 +1,17 @@
-// Create an Entry class with private attributes description, checked, active and entries, which is an array of Entry objects
+// Entry class represents a to-do entry with description, checked status, active status, and sub-entries
 class Entry {
     #description;
     #checked;
     #active;
     #entries;
 
+    /**
+     * Constructs an Entry instance
+     * @param {string} description - The description of the entry
+     * @param {boolean} checked - The checked status of the entry
+     * @param {boolean} active - The active status of the entry
+     * @param {Entry[]} entries - An array of sub-entries
+     */
     constructor(description = '', checked = false, active = true, entries = []) {
         this.#description = description;
         this.#checked = checked;
@@ -25,7 +32,7 @@ class Entry {
     }
 
     toggleChecked() {
-        this.#checked = !this.#checked
+        this.#checked = !this.#checked;
     }
 
     setChecked(value) {
@@ -48,17 +55,24 @@ class Entry {
         this.#entries = value;
     }
 
-    // Create a function that adds multiple entries to the entries attribute
     addEntries(entries) {
         this.#entries.push(...entries);
     }
 
-    // Create a function that converts a JSON object array to Entry[]
+    /**
+     * Converts a JSON array to an array of Entry instances
+     * @param {Object[]} objArray - The JSON array to convert
+     * @returns {Entry[]} - An array of Entry instances
+     */
     static fromJSON(objArray) {
         return objArray.map(obj => Entry.fromObject(obj));
     }
 
-    // Create a method to get an instance of type Entry from an object with subobjects being converted to Entry types as well
+    /**
+     * Creates an Entry instance from a plain object
+     * @param {Object} obj - The object to convert
+     * @returns {Entry} - An Entry instance
+     */
     static fromObject(obj) {
         const entry = new Entry(
             obj.description,
@@ -70,7 +84,10 @@ class Entry {
         return entry;
     }
 
-    // Add a method to convert ths instance into an object with subentries being converted to objects as well
+    /**
+     * Converts the Entry instance to a plain object
+     * @returns {Object} - The plain object representation of the Entry instance
+     */
     toObject() {
         return {
             description: this.getDescription(),
