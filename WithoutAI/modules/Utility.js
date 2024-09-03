@@ -1,11 +1,14 @@
 import Entry from "./Entry.js";
 import dh from "./DataHandler.js";
 
+// Bootstrap classes for button icons
 const Icon = {
     CHECK:      'bi bi-check-lg',
     EDIT:       'bi bi-pencil-square',
     SAVE:       'bi bi-floppy'
 };
+
+// Button modes
 const Mode = {
     EDIT: 'EDIT',
     SAVE: 'SAVE'
@@ -21,28 +24,58 @@ const application = {
     newTaskButton: document.getElementById('newTaskButton')
 };
 
+/**
+ * Checks if the input element has a valid value
+ * @param element       Input element to be checked
+ * @returns {boolean}   True if the input element has a valid value, false otherwise
+ */
 function hasValidInput(element) {
     return (element.value !== '');
 }
 
+/**
+ * Set the state of a button based on the input element
+ * @param button    Button to be set
+ * @param input     Input element to be checked
+ */
 function setButtonState(button, input) {
     button.disabled = !hasValidInput(input);
 }
 
+/**
+ * Reset the value of the input element and button
+ * @param element   Input element to be reset
+ * @param button    Button to be reset
+ */
 function resetInput(element, button) {
     element.classList.remove('is-invalid', 'is-valid');
     element.value = '';
     setButtonState(button, element);
 }
 
+/**
+ * Get the context of an element
+ * @param element   Element to get the context from
+ * @returns {*}     Context of the element
+ */
 function getElementContext(element) {
     return element.closest('div[id]').id;
 }
 
+/**
+ * Get the context of a new entry
+ * @param entry         New entry to get the context from
+ * @returns {string}    Context of the new entry
+ */
 function getNewEntryContext(entry) {
     return entry.parentElement.previousElementSibling.id;
 }
 
+/**
+ * Get the index of an element
+ * @param element       Element to get the index from
+ * @returns {number}    Index of the element
+ */
 function getElementIndex(element) {
     const context = getElementContext(element);
     const contextElement = document.getElementById(context);
@@ -54,6 +87,9 @@ function getElementIndex(element) {
     return Array.from(contextElement.children).indexOf(element);
 }
 
+/**
+ * Define base event listeners for static elements
+ */
 function defineBaseEventListener() {
     application.download.addEventListener('click', function () {
         dh.export(this);
@@ -77,6 +113,9 @@ function defineBaseEventListener() {
     });
 }
 
+/**
+ * Define event listeners for dynamic elements
+ */
 function defineEventListener() {
     const todoInputs = document.getElementById(dh.LS_KEY.TODOS)
         .querySelectorAll('input');
@@ -113,6 +152,10 @@ function defineEventListener() {
     });
 }
 
+/**
+ * Create a new entry based on the input element
+ * @param entry Input element to create the entry from
+ */
 function createEntry(entry){
     const newEntryContext = getNewEntryContext(entry);
 
@@ -131,11 +174,19 @@ function createEntry(entry){
     renderView();
 }
 
+/**
+ * Validate the input of an element
+ * @param element   Element to be validated
+ */
 function validateInput(element) {
     element.classList.add(hasValidInput(element) ? 'is-valid' : 'is-invalid');
     element.classList.remove(hasValidInput(element) ? 'is-invalid' : 'is-valid');
 }
 
+/**
+ * Check an entry and set the checked state
+ * @param element   Element to be checked
+ */
 function checkEntry(element) {
     const context = getElementContext(element);
     const index = getElementIndex(element);
@@ -155,6 +206,9 @@ function checkEntry(element) {
     renderView();
 }
 
+/**
+ * Check the completion of a to-do according to its subtasks
+ */
 function checkTodoCompletion() {
     const lsEntries = dh.loadData();
     let completed = true
@@ -165,6 +219,9 @@ function checkTodoCompletion() {
     });
 }
 
+/**
+ * Edit and save an entry
+ */
 function editAndSaveEntry() {
     let inputTextField = this.parentElement.querySelector('input');
     let icon = this.parentElement.querySelector('.btn-outline-primary > i');
@@ -189,6 +246,10 @@ function editAndSaveEntry() {
     );
 }
 
+/**
+ * Delete an entry
+ * @param element   Element to be deleted
+ */
 function deleteEntry(element) {
     let index = getElementIndex(element);
     let context = getElementContext(element);
@@ -203,11 +264,18 @@ function deleteEntry(element) {
     renderView();
 }
 
+/**
+ * Set the active to-do
+ * @param element   Element to be set as active
+ */
 function setActiveTodo(element) {
     dh.setActiveTodo(getElementIndex(element));
     renderView();
 }
 
+/**
+ * Render the view based on the local storage data
+ */
 function renderView() {
     const lsEntries = dh.loadData();
     let todosDiv = document.getElementById(dh.LS_KEY.TODOS);
@@ -232,6 +300,12 @@ function renderView() {
     defineEventListener();
 }
 
+/**
+ * Create an HTML element from an entry based on its context
+ * @param context               Context of the entry
+ * @param contextElement        Entry to be converted to HTML element
+ * @returns {HTMLDivElement}    HTML element of the entry
+ */
 function createHTML(context, contextElement) {
     let element = document.createElement('div');
     let checked = (contextElement.getChecked()) ? ' active' : '';
@@ -258,10 +332,18 @@ function createHTML(context, contextElement) {
     return element;
 }
 
+/**
+ * Handle the drag start event
+ * @param element   Element to be dragged
+ */
 function onDragStart(element) {
     element.classList.add('dragging');
 }
 
+/**
+ * Handle the drag end event
+ * @param element   Element to be dropped
+ */
 function onDragEnd(element) {
     const parentDiv = document.getElementById(getElementContext(element));
     const othersInDiv = [...parentDiv.querySelectorAll('div:not(.dragging)')];
@@ -280,6 +362,12 @@ function onDragEnd(element) {
     }
 }
 
+/**
+ * Get the target element on drop
+ * @param parent        Parent element of the dragged element
+ * @param othersInDiv   Other elements in the parent div
+ * @returns {*|null}    Target element on drop
+ */
 function getTargetElementOnDrop(parent, othersInDiv) {
     const mouseX = event.clientX;
     const mouseY = event.clientY;

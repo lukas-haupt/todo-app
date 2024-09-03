@@ -47,18 +47,31 @@ class Entry {
         this.#entries = entries;
     }
 
+    /**
+     * Add subtasks to the current entry
+     * @param entries   Subtasks to be added
+     */
     addEntries(...entries) {
         for (const entry of entries) {
             this.#entries.push(entry);
         }
     }
 
+    /**
+     * Create an Entry class instance from a given object
+     * @param obj       Object to be converted to Entry class instance
+     * @returns {Entry} Entry class instance
+     */
     static fromObject(obj) {
         const entry = new Entry(obj.description, obj.active, obj.checked);
         Object.values(obj.entries).forEach(subtask => entry.addEntries(this.fromObject(subtask)));
         return entry;
     }
 
+    /**
+     * Convert an instance to an object
+     * @returns {Object}    Object representation of the instance
+     */
     toObject() {
         return {
             description: this.getDescription(),
