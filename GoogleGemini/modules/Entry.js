@@ -3,7 +3,7 @@ class Entry {
         this.description = description;
         this.checked = checked;
         this.active = active;
-        this.entries = entries;
+        this.entries = entries.map(entryObj => Entry.fromObject(entryObj));
     }
 
     static fromObject(obj) {
