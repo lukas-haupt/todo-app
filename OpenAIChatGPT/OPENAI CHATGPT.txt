@@ -1,0 +1,102 @@
+OPENAI CHATGPT
+______________
+
+HTML:
+
+Create an HTML structure for my todo web application. The app is split into two columns, where the left side is for main todo's and the right side is for the subtasks. Every todo/task defined as "Entry" is listed in a list group. Every entry has a check button, an input field for the description, an edit/save button and a delete button. In the end the entry should also be draggable and droppable. There is no need to set styles as we will use Bootstrap for styles.
+
+I need an input field with an "add" button to add entries to both sides of the application.
+
+
+
+Entry Class:
+
+Create a class called Entry, that is responsible for handling entry objects. The attributes should contain "checked" to see, if an entry is checked, "active" to see, which todo is currently visible, a "description" and an object "entries" for the subtasks.
+
+The entries have to be stored in the localStorage. For that I'd like to store them as JSON format. So we need an additional method to convert them into a JSON string.
+
+
+
+DataHandler class:
+
+I need a DataHandler class, which allows operations on the localStorage. First of all, I need two additional buttons in my application that allow uploading or downloading the localStorage as JSON format. Create the corresponding functions in the DataHandler class.
+
+
+
+Sample Data:
+
+Can you give me sample data with 3 todos, where the first has two tasks, the second has one task and the third has none. It should be in JSON format.
+
+The subentries should also be of class Entry. Can you regenerate the JSON output?
+
+
+
+Render view:
+
+Now I need a function that is called after each manipulation of the localStorage. It should render the todos/subtasks of the localStorage dynamically into the HTML list.
+
+
+
+Functionalities:
+
+Only one todo at a time can be active. Todo's can be active when doubleclicking on the entry.
+
+Can you hightlight the active todo in another not yet used color?
+
+When all subtasks of a todo are checked, the active todo should be checked as well.
+
+I need a check function, that overwrites the value in the localstorage
+
+How do I have to edit the rest, so that the check functionality is working?
+
+Create a function that sets the "checked" value of an entry in the localstorage after clicking the checkbox.
+
+Create two functions:
+1. Add functionality for the download button, that exports the current localstorage item, where the data for the application is stored in a file "openaichatgpt.json".
+2. Add functionality to the upload button, that imports a JSON (likely the format of the one exported). It should overwrite the data for the application. When imported, the view should render again.
+
+Create a functionality, that sets a todo entry as active, when double clicking on the <li> tag of the todo. the background of the item should switch to yellow then.
+
+Update the renderEntries function, so that only subtasks of the active todo are rendered.
+
+Create a function, that checks whether a todo is automatically checked, when all subtasks are checked.
+
+Create a function for the delete button, that deletes:
+1. a todo with all subtasks or
+2. a subtask
+
+Create the functionality for the edit/save button.
+
+The application has the option to reorder the chronology of the list. When dragging and dropping entries, the localstorage should be updated as well.
+
+If the active todo was deleted, then set the first todo as active.
+
+Add the functionality to add todos/subtasks.
+If the todo gets added, it should be active and appended to the list.
+If the subtask gets added, it should be appended to the list of entries of the current active todo.
+
+
+
+Bugfixes:
+
+Cannot create property 'active' on string '{"checked":false,"active":false,"description":"undefined","entries":[]}'
+
+Cannot read properties of undefined (reading 'map')
+
+When I create new entries, the description of the newly listed entries is undefined.
+
+["{\"checked\":false,\"active\":true,\"description\":\"\",\"entries\":[]}","{\"checked\":false,\"active\":false,\"description\":\"\",\"entries\":[]}","{\"checked\":false,\"active\":false,\"description\":\"\",\"entries\":[]}"]
+This is what localstorage stores when importing json files.  Why are there backslashes and can I remove them?
+
+In my case all three todos are active but that is false
+
+When I switch the active todo, the localstorage is wrongly written
+
+Every time I change a todo active state, localstorage todo description gets erased
+
+I have this json string
+"[{"description":"Todo 1","checked":false,"active":false,"entries":[{"description":"Subtask 1.1","checked":false,"active":false,"entries":[]},{"description":"Subtask 1.2","checked":false,"active":false,"entries":[]}]},{"description":"Todo 2","checked":true,"active":false,"entries":[{"description":"Subtask 2.1","checked":false,"active":false,"entries":[]}]},{"description":"Todo 3","checked":false,"active":false,"entries":[]}]"
+When I check an entry I get this back:
+"["{\"checked\":true,\"active\":false,\"description\":\"Todo 1\",\"entries\":[]}","{\"checked\":true,\"active\":false,\"description\":\"Todo 2\",\"entries\":[]}","{\"checked\":false,\"active\":false,\"description\":\"Todo 3\",\"entries\":[]}"]"
+
+

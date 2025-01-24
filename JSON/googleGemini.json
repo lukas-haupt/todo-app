@@ -1,0 +1,41 @@
+[
+    {
+        "description": "Todo1",
+        "checked": false,
+        "active": true,
+        "entries": [
+            {
+                "description": "Subtask1",
+                "checked": false,
+                "active": false,
+                "entries": []
+            },
+            {
+                "description": "Subtask2",
+                "checked": false,
+                "active": false,
+                "entries": []
+            }
+        ]
+    },
+    {
+        "description": "Todo2",
+        "checked": false,
+        "active": false,
+        "entries": [
+            {
+                "description": "Subtask3",
+                "checked": false,
+                "active": false,
+                "entries": []
+            }
+        ]
+    },
+    {
+        "description": "Todo3",
+        "checked": false,
+        "active": false,
+        "entries": []
+    }
+]
+

@@ -1,0 +1,40 @@
+[
+	{
+		"description": "Test1",
+		"active": true,
+		"checked": false,
+		"entries": [
+			{
+				"description": "Task1",
+				"active": false,
+				"checked": false,
+				"entries": []
+			},
+			{
+				"description": "Task2",
+				"active": false,
+				"checked": false,
+				"entries": []
+			}
+		]
+	},
+	{
+		"description": "Test2",
+		"active": false,
+		"checked": false,
+		"entries": [
+			{
+				"description": "Task3",
+				"active": false,
+				"checked": false,
+				"entries": []
+			}
+		]
+	},
+	{
+		"description": "Test3",
+		"active": false,
+		"checked": false,
+		"entries": []
+	}
+]
